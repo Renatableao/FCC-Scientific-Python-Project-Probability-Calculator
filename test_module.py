@@ -1,77 +1,36 @@
-import pytest
+import unittest
+import prob_calculator
 
-from arithmetic_arranger import arithmetic_arranger
+prob_calculator.random.seed(95)
+class UnitTests(unittest.TestCase):
+    maxDiff = None
+    def test_hat_class_contents(self):
+        hat = prob_calculator.Hat(red=3,blue=2)
+        actual = hat.contents
+        expected = ["red","red","red","blue","blue"]
+        self.assertEqual(actual, expected, 'Expected creation of hat object to add correct contents.')
 
-test_cases = [
-    pytest.param(
-        [['3801 - 2', '123 + 49']],
-        '  3801      123\n'
-        '-    2    +  49\n'
-        '------    -----',
-        'Expected different output when calling "arithmetic_arranger()" with ["3801 - 2", "123 + 49"]',
-        id='test_two_problems_arrangement1'),
-    pytest.param(
-        [['1 + 2', '1 - 9380']],
-        '  1         1\n'
-        '+ 2    - 9380\n'
-        '---    ------',
-        'Expected different output when calling "arithmetic_arranger()" with ["1 + 2", "1 - 9380"]',
-        id='test_two_problems_arrangement2'),
-    pytest.param(
-        [['3 + 855', '3801 - 2', '45 + 43', '123 + 49']],
-        '    3      3801      45      123\n'
-        '+ 855    -    2    + 43    +  49\n'
-        '-----    ------    ----    -----',
-        'Expected different output when calling "arithmetic_arranger()" with ["3 + 855", "3801 - 2", "45 + 43", "123 + 49"]',
-        id='test_four_problems_arrangement'),
-    pytest.param(
-        [['11 + 4', '3801 - 2999', '1 + 2', '123 + 49', '1 - 9380']],
-        '  11      3801      1      123         1\n'
-        '+  4    - 2999    + 2    +  49    - 9380\n'
-        '----    ------    ---    -----    ------',
-        'Expected different output when calling "arithmetic_arranger()" with ["11 + 4", "3801 - 2999", "1 + 2", "123 + 49", "1 - 9380"]',
-        id='test_five_problems_arrangement'),
-    pytest.param(
-        [['44 + 815', '909 - 2', '45 + 43', '123 + 49',
-          '888 + 40', '653 + 87']],
-        'Error: Too many problems.',
-        'Expected calling "arithmetic_arranger()" with more than five problems to return "Error: Too many problems."',
-        id='test_too_many_problems'),
-    pytest.param(
-        [['3 / 855', '3801 - 2', '45 + 43', '123 + 49']],
-        "Error: Operator must be '+' or '-'.",
-        '''Expected calling "arithmetic_arranger()" with a problem that uses the "/" operator to return "Error: Operator must be '+' or '-'."''',
-        id='test_incorrect_operator'),
-    pytest.param(
-        [['24 + 85215', '3801 - 2', '45 + 43', '123 + 49']],
-        'Error: Numbers cannot be more than four digits.',
-        'Expected calling "arithmetic_arranger()" with a problem that has a number over 4 digits long to return "Error: Numbers cannot be more than four digits."',
-        id='test_too_many_digits'),
-    pytest.param(
-        [['98 + 3g5', '3801 - 2', '45 + 43', '123 + 49']],
-        'Error: Numbers must only contain digits.',
-        'Expected calling "arithmetic_arranger()" with a problem that contains a letter character in the number to return "Error: Numbers must only contain digits."',
-        id='test_only_digits'),
-    pytest.param(
-        [['3 + 855', '988 + 40'], True],
-        '    3      988\n'
-        '+ 855    +  40\n'
-        '-----    -----\n'
-        '  858     1028',
-        'Expected solutions to be correctly displayed in output when calling "arithmetic_arranger()" with ["3 + 855", "988 + 40"] and a second argument of `True`.',
-        id='test_two_problems_with_solutions'),
-    pytest.param(
-        [['32 - 698', '1 - 3801', '45 + 43', '123 + 49', '988 + 40'], True],
-        '   32         1      45      123      988\n'
-        '- 698    - 3801    + 43    +  49    +  40\n'
-        '-----    ------    ----    -----    -----\n'
-        ' -666     -3800      88      172     1028',
-        'Expected solutions to be correctly displayed in output when calling "arithmetic_arranger()" with five arithmetic problems and a second argument of `True`.',
-        id='test_five_problems_with_solutions'),
-]
+    def test_hat_draw(self):
+        hat = prob_calculator.Hat(red=5,blue=2)
+        actual = hat.draw(2)
+        expected = ['blue', 'red']
+        self.assertEqual(actual, expected, 'Expected hat draw to return two random items from hat contents.')
+        actual = len(hat.contents)
+        expected = 5
+        self.assertEqual(actual, expected, 'Expected hat draw to reduce number of items in contents.')
+
+    def test_prob_experiment(self):
+        hat = prob_calculator.Hat(blue=3,red=2,green=6)
+        probability = prob_calculator.experiment(hat=hat, expected_balls={"blue":2,"green":1}, num_balls_drawn=4, num_experiments=1000)
+        actual = probability
+        expected = 0.272
+        self.assertAlmostEqual(actual, expected, delta = 0.01, msg = 'Expected experiment method to return a different probability.')
+        hat = prob_calculator.Hat(yellow=5,red=1,green=3,blue=9,test=1)
+        probability = prob_calculator.experiment(hat=hat, expected_balls={"yellow":2,"blue":3,"test":1}, num_balls_drawn=20, num_experiments=100)
+        actual = probability
+        expected = 1.0
+        self.assertAlmostEqual(actual, expected, delta = 0.01, msg = 'Expected experiment method to return a different probability.')
 
 
-@pytest.mark.parametrize('arguments,expected_output,fail_message', test_cases)
-def test_template(arguments, expected_output, fail_message):
-    actual = arithmetic_arranger(*arguments)
-    assert actual == expected_output, fail_message
+if __name__ == "__main__":
+    unittest.main()
